@@ -7,13 +7,10 @@ class ListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('バウンスエリア色変えたいんじゃ'), elevation: 0.0,),
-      body: ChangeNotifierProvider(
-        create: (context) => _OffsetChangeNotifier(0.0),
-        child: _Page(),
-      ),
+      body: _Page(),
     );
   }
-}
+} 
 
 class _Page extends StatefulWidget {
   @override
@@ -22,6 +19,7 @@ class _Page extends StatefulWidget {
 
 class _PageState extends State<_Page> {
 
+  final _OffsetChangeNotifier _offsetChangeNotifier = _OffsetChangeNotifier(0.0);
   final ScrollController _controller = ScrollController();
 
   @override
@@ -31,11 +29,20 @@ class _PageState extends State<_Page> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Stack(
       children: <Widget>[
-        _BounceArea(theme.primaryColor),
+        ChangeNotifierProvider(
+          create: (context) => _offsetChangeNotifier,
+          child: _BounceArea(theme.primaryColor),
+        ),
         _buildList()
       ],
     );
@@ -67,7 +74,7 @@ class _PageState extends State<_Page> {
             return _buildItem('かといって、フッターとか下の方は変えたくない。そのままで良いんじゃ');
           case 3:
             return _buildItem('なので、ListViewをContainerに入れちゃうやつはだめなのじゃ');
-          case 8:
+          case 6:
             return null;
           default:
             return _buildItem('Row: $index');
@@ -79,7 +86,7 @@ class _PageState extends State<_Page> {
   Widget _buildItem(String text) => ListTile(title: Text(text)); 
 
   void _scrollControllerListener() {
-    Provider.of<_OffsetChangeNotifier>(context, listen: false).setOffset(_controller.offset);
+    _offsetChangeNotifier.setOffset(_controller.offset);
   }
 }
 
